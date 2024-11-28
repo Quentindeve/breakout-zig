@@ -29,12 +29,20 @@ pub fn build(b: *std.Build) void {
     // running `zig build`).
     b.installArtifact(lib);
 
+    const raylib = b.dependency("raylib", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     const exe = b.addExecutable(.{
-        .name = "raylib",
+        .name = "breakout-zig",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
+
+    //exe.addModule("raylib", raylib.module("raylib"));
+    exe.linkLibrary(raylib.artifact("raylib"));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
@@ -42,8 +50,7 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(exe);
 
     exe.linkLibC();
-    exe.linkSystemLibrary("raylib");
-    exe.addIncludePath(.{ .cwd_relative = "raylib" });
+    exe.addIncludePath(.{ .cwd_relative = "raylib/src" });
 
     // This *creates* a Run step in the build graph, to be executed when another
     // step is evaluated that depends on it. The next line below will establish
